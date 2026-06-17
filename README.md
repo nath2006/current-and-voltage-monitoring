@@ -97,12 +97,22 @@ Payload:
 
 ```json
 {
-  "voltage": 220.5,
-  "current": 0.32,
-  "power": 70.4,
-  "energy": 0.386,
-  "frequency": 50.0,
-  "pf": 0.98
+    "success": true,
+    "data": {
+        "telemetry": {
+            "voltage": 228.4,
+            "current": 0.38,
+            "power": 74.6,
+            "energy": 0.491,
+            "frequency": 49.9,
+            "pf": 0.85,
+            "updatedAt": "2026-06-17T02:39:56.767Z"
+        },
+        "device": {
+            "online": true,
+            "lastUpdate": "2026-06-17T02:39:56.767Z"
+        }
+    }
 }
 ```
 
@@ -145,15 +155,22 @@ Example Response:
 
 ```json
 {
-  "success": true,
-  "data": {
-    "voltage": 220.5,
-    "current": 0.32,
-    "power": 70.4,
-    "energy": 0.386,
-    "frequency": 50,
-    "pf": 0.98
-  }
+    "success": true,
+    "data": {
+        "telemetry": {
+            "voltage": 228.4,
+            "current": 0.38,
+            "power": 74.6,
+            "energy": 0.491,
+            "frequency": 49.9,
+            "pf": 0.85,
+            "updatedAt": "2026-06-17T02:39:56.767Z"
+        },
+        "device": {
+            "online": true,
+            "lastUpdate": "2026-06-17T02:39:56.767Z"
+        }
+    }
 }
 ```
 
@@ -229,13 +246,7 @@ project-root
 
 ### Dashboard
 
-<img src="./preview/image.png" alt="Dashboard Preview">
-
-## Realtime Monitoring Demo
-<p>Klik for watch video</p>
-<a href="./preview/dashboard-preview.mp4">
-    <img src="./preview/image.png" alt="Watch Demo" width="800">
-</a>
+<img src="./frontend//preview/image.png" alt="Dashboard Preview">
 
 ---
 

@@ -1,125 +1,17 @@
-// const express = require("express");
-// const http = require("http");
-// const { Server } = require("socket.io");
-// const mqtt = require("mqtt");
-// const cors = require("cors");
-
-// const app = express();
-
-// app.use(cors());
-// app.use(express.json());
-
-// const server = http.createServer(app);
-
-// const io = new Server(server, {
-//   cors: {
-//     origin: "*",
-//   },
-// });
-
-// // =====================
-// // STORE DATA TERAKHIR
-// // =====================
-
-// let latestPzemData = {
-//   voltage: 0,
-//   current: 0,
-//   power: 0,
-//   energy: 0,
-//   frequency: 0,
-//   pf: 0,
-//   updatedAt: null,
-// };
-
-// // =====================
-// // MQTT CONNECT
-// // =====================
-
-// const mqttClient = mqtt.connect(
-//   "mqtt://192.168.1.6:1883"
-// );
-
-// mqttClient.on("connect", () => {
-//   console.log("MQTT Connected");
-
-//   mqttClient.subscribe("pzem/data");
-// });
-
-// mqttClient.on("message", (topic, message) => {
-//   try {
-//     const payload = JSON.parse(
-//       message.toString()
-//     );
-
-//     latestPzemData = {
-//       ...payload,
-//       updatedAt: new Date(),
-//     };
-
-//     console.log(
-//       "MQTT DATA:",
-//       latestPzemData
-//     );
-
-//     io.emit(
-//       "pzem-data",
-//       latestPzemData
-//     );
-//   } catch (err) {
-//     console.error(err);
-//   }
-// });
-
-// // =====================
-// // API
-// // =====================
-
-// app.get("/api/pzem/latest", (req, res) => {
-//   res.json({
-//     success: true,
-//     data: latestPzemData,
-//   });
-// });
-
-// // =====================
-// // SOCKET
-// // =====================
-
-// io.on("connection", (socket) => {
-//   console.log(" Client Connected");
-
-//   // kirim data terakhir saat client connect
-//   socket.emit(
-//     "pzem-data",
-//     latestPzemData
-//   );
-
-//   socket.on("disconnect", () => {
-//     console.log("Client Disconnected");
-//   });
-// });
-
-// // =====================
-// // RUN SERVER
-// // =====================
-
-// server.listen(3001, "0.0.0.0", () => {
-//   console.log(
-//     " Server Running On Port 3001"
-//   );
-// });
 const express = require("express");
 const http = require("http");
-const mqtt = require("mqtt");
 const cors = require("cors");
+const mqtt = require("mqtt");
 
 const app = express();
-
 app.use(cors());
 app.use(express.json());
 
 const server = http.createServer(app);
 
+// =====================
+// STATE
+// =====================
 let latestData = {
   voltage: 0,
   current: 0,
@@ -127,44 +19,81 @@ let latestData = {
   energy: 0,
   frequency: 0,
   pf: 0,
+  updatedAt: null,
 };
 
-const mqttClient = mqtt.connect(
-  "mqtt://192.168.1.103:1883"
-);
+let deviceStatus = {
+  online: false,
+  lastUpdate: null,
+};
+
+let offlineTimer = null;
+
+// =====================
+// MARK DEVICE ONLINE
+// =====================
+function markOnline() {
+  deviceStatus.online = true;
+  deviceStatus.lastUpdate = new Date().toISOString();
+
+  if (offlineTimer) clearTimeout(offlineTimer);
+
+  offlineTimer = setTimeout(() => {
+    deviceStatus.online = false;
+  }, 5000);
+}
+
+// =====================
+// MQTT
+// =====================
+const mqttClient = mqtt.connect("mqtt://192.168.1.103:1883");
 
 mqttClient.on("connect", () => {
-  console.log("MQTT Connected");
-
+  console.log("[MQTT] Connected");
   mqttClient.subscribe("pzem/data");
 });
 
 mqttClient.on("message", (topic, message) => {
   try {
-    const payload = JSON.parse(
-      message.toString()
-    );
+    const payload = JSON.parse(message.toString());
+    const now = new Date().toISOString();
 
-    latestData = payload;
+    latestData = {
+      voltage: payload.voltage,
+      current: payload.current,
+      power: payload.power,
+      energy: payload.energy,
+      frequency: payload.frequency,
+      pf: payload.pf,
+      updatedAt: now,
+    };
 
-    console.log(
-      "Latest Data:",
-      latestData
-    );
+    markOnline();
+
+    console.log("[MQTT] Updated");
   } catch (err) {
-    console.error(err);
+    console.error("[MQTT] Parse Error:", err.message);
   }
 });
 
+// =====================
+// REST API
+// =====================
 app.get("/api/pzem/latest", (req, res) => {
   res.json({
     success: true,
-    data: latestData,
+    data: {
+      telemetry: latestData,
+      device: deviceStatus,
+    },
   });
 });
 
-server.listen(3001, "0.0.0.0", () => {
-  console.log(
-    "API Running: http://192.168.1.6:3001"
-  );
+// =====================
+// START SERVER
+// =====================
+const PORT = 3001;
+
+server.listen(PORT, "0.0.0.0", () => {
+  console.log(`[SERVER] Running on http://192.168.1.6:${PORT}`);
 });
