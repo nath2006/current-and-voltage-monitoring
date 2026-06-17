@@ -1,7 +1,13 @@
-const express = require("express");
-const http = require("http");
-const cors = require("cors");
-const mqtt = require("mqtt");
+import "dotenv/config";
+
+import express from "express";
+import http from "http";
+import cors from "cors";
+import mqtt from "mqtt";
+
+import pzemRoutes from "./routes/pzemRoutes.ts";
+import { maybeRecordReading } from "./services/readingService.ts";
+import { startScheduledJobs } from "./services/scheduler.ts";
 
 const app = express();
 app.use(cors());
@@ -10,7 +16,7 @@ app.use(express.json());
 const server = http.createServer(app);
 
 // =====================
-// STATE
+// STATE (live data, in-memory, untuk realtime polling)
 // =====================
 let latestData = {
   voltage: 0,
@@ -46,14 +52,14 @@ function markOnline() {
 // =====================
 // MQTT
 // =====================
-const mqttClient = mqtt.connect("mqtt://192.168.1.8:1883");
+const mqttClient = mqtt.connect(process.env.MQTT_BROKER_URL || "mqtt://192.168.1.8:1883");
 
 mqttClient.on("connect", () => {
   console.log("[MQTT] Connected");
-  mqttClient.subscribe("pzem/data");
+  mqttClient.subscribe(process.env.MQTT_TOPIC || "pzem/data");
 });
 
-mqttClient.on("message", (topic, message) => {
+mqttClient.on("message", async (topic, message) => {
   try {
     const payload = JSON.parse(message.toString());
     const now = new Date().toISOString();
@@ -70,15 +76,27 @@ mqttClient.on("message", (topic, message) => {
 
     markOnline();
 
+    // Downsampling: hanya tersimpan ke DB tiap interval tertentu (lihat readingService)
+    const wasSaved = await maybeRecordReading(latestData);
+    if (wasSaved) {
+      console.log("[DB] Reading saved at", now);
+    }
+
     console.log("[MQTT] Updated");
   } catch (err) {
     console.error("[MQTT] Parse Error:", err.message);
   }
 });
 
+mqttClient.on("error", (err) => {
+  console.error("[MQTT] Connection error:", err.message);
+});
+
 // =====================
 // REST API
 // =====================
+
+// Live data (real-time polling, tidak melalui DB)
 app.get("/api/pzem/latest", (req, res) => {
   res.json({
     success: true,
@@ -89,11 +107,15 @@ app.get("/api/pzem/latest", (req, res) => {
   });
 });
 
+// Fitur history, heatmap, events, summary, cost (lihat src/routes/pzemRoutes.js)
+app.use("/api/pzem", pzemRoutes);
+
 // =====================
 // START SERVER
 // =====================
-const PORT = 3001;
+const PORT = process.env.PORT || 3001;
 
 server.listen(PORT, "0.0.0.0", () => {
-  console.log(`[SERVER] Running on http://192.168.1.6:${PORT}`);
+  console.log(`[SERVER] Running on http://0.0.0.0:${PORT}`);
+  startScheduledJobs();
 });

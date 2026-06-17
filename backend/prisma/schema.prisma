@@ -1,0 +1,63 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "mysql"
+}
+
+enum UsageState {
+  idle
+  charging_small
+  charging_laptop
+  multi_device
+}
+
+// Data mentah hasil downsampling (1 baris per menit)
+model Reading {
+  id         Int        @id @default(autoincrement())
+  voltage    Float
+  current    Float
+  power      Float
+  energy     Float
+  frequency  Float
+  pf         Float
+  state      UsageState
+  recordedAt DateTime   @default(now()) @map("recorded_at")
+
+  @@index([recordedAt])
+  @@map("readings")
+}
+
+// Event log start/stop pemakaian, diturunkan otomatis dari perubahan state
+model UsageEvent {
+  id              Int        @id @default(autoincrement())
+  state           UsageState
+  startedAt       DateTime   @map("started_at")
+  endedAt         DateTime?  @map("ended_at")
+  durationSeconds Int?       @map("duration_seconds")
+  avgPower        Float?     @map("avg_power")
+  energyUsed      Float?     @map("energy_used")
+
+  @@index([startedAt])
+  @@map("usage_events")
+}
+
+// Rollup harian, supaya query grafik bulanan tidak perlu scan semua raw readings
+model DailySummary {
+  date                  DateTime @id @db.Date
+  totalEnergyKwh        Float    @map("total_energy_kwh")
+  activeDurationSeconds Int      @map("active_duration_seconds")
+  avgPower              Float    @map("avg_power")
+  peakPower             Float    @map("peak_power") 
+  peakHour              Int?     @map("peak_hour")
+
+  @@map("daily_summary")
+}
+
