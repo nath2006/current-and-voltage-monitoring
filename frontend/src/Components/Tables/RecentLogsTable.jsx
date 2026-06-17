@@ -1,54 +1,45 @@
+import { Card, CardContent, CardHeader, CardTitle } from "@/Components/ui/card";
 import usePzem from "../../hooks/usePzem";
 
 export default function RecentLogsTable() {
   const { data } = usePzem();
 
+  const rows = [
+    { label: "Voltage", value: data?.voltage ?? 0, unit: "V" },
+    { label: "Current", value: data?.current ?? 0, unit: "A" },
+    { label: "Power", value: data?.power ?? 0, unit: "W" },
+    { label: "Energy", value: data?.energy ?? 0, unit: "kWh" },
+    { label: "Frequency", value: data?.frequency ?? 0, unit: "Hz" },
+    { label: "PF", value: data?.pf ?? 0, unit: "" },
+  ];
+
   return (
-    <div className="bg-white p-4 rounded-xl shadow">
-      <h2 className="text-lg font-semibold mb-4">
-        Data Monitoring PZEM
-      </h2>
+    <Card>
+      <CardHeader>
+        <CardTitle className="text-base">Data Monitoring PZEM</CardTitle>
+      </CardHeader>
 
-      <table className="w-full">
-        <thead>
-          <tr className="border-b">
-            <th className="text-left py-2">Parameter</th>
-            <th className="text-left py-2">Value</th>
-          </tr>
-        </thead>
+      <CardContent>
+        <table className="w-full text-sm">
+          <thead>
+            <tr className="border-b text-left text-muted-foreground">
+              <th className="py-2 font-medium">Parameter</th>
+              <th className="py-2 font-medium">Value</th>
+            </tr>
+          </thead>
 
-        <tbody>
-          <tr>
-            <td>Voltage</td>
-            <td>{data?.voltage ?? 0} V</td>
-          </tr>
-
-          <tr>
-            <td>Current</td>
-            <td>{data?.current ?? 0} A</td>
-          </tr>
-
-          <tr>
-            <td>Power</td>
-            <td>{data?.power ?? 0} W</td>
-          </tr>
-
-          <tr>
-            <td>Energy</td>
-            <td>{data?.energy ?? 0} kWh</td>
-          </tr>
-
-          <tr>
-            <td>Frequency</td>
-            <td>{data?.frequency ?? 0} Hz</td>
-          </tr>
-
-          <tr>
-            <td>PF</td>
-            <td>{data?.pf ?? 0}</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
+          <tbody>
+            {rows.map((row) => (
+              <tr key={row.label} className="border-b last:border-0">
+                <td className="py-2.5">{row.label}</td>
+                <td className="py-2.5 font-medium">
+                  {row.value} {row.unit}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </CardContent>
+    </Card>
   );
 }

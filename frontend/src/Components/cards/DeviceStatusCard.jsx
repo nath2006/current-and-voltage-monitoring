@@ -1,26 +1,36 @@
+import { Card, CardContent, CardHeader, CardTitle } from "@/Components/ui/card";
+import { Badge } from "@/Components/ui/badge";
+import { Wifi, WifiOff } from "lucide-react";
+
 export default function DeviceStatusCard({ device }) {
   const isOnline = device?.online;
 
   return (
-    <div className="bg-white rounded-2xl p-5 shadow-sm">
-      <h3 className="font-semibold">Device Status</h3>
+    <Card>
+      <CardHeader>
+        <CardTitle className="text-base">Device Status</CardTitle>
+      </CardHeader>
 
-      <div className="mt-4 flex items-center gap-3">
-        <div
-          className={`w-3 h-3 rounded-full ${
-            isOnline ? "bg-green-500" : "bg-red-500"
-          }`}
-        />
+      <CardContent>
+        <div className="flex items-center gap-2">
+          {isOnline ? (
+            <Wifi className="h-4 w-4 text-emerald-500" />
+          ) : (
+            <WifiOff className="h-4 w-4 text-rose-500" />
+          )}
 
-        <span>{isOnline ? "ESP32 Online" : "ESP32 Offline"}</span>
-      </div>
+          <Badge variant={isOnline ? "success" : "destructive"}>
+            {isOnline ? "ESP32 Online" : "ESP32 Offline"}
+          </Badge>
+        </div>
 
-      <div className="mt-2 text-sm text-slate-500">
-        Last Update:{" "}
-        {device?.lastUpdate
-          ? new Date(device.lastUpdate).toLocaleTimeString()
-          : "-"}
-      </div>
-    </div>
+        <p className="mt-3 text-sm text-muted-foreground">
+          Last Update:{" "}
+          {device?.lastUpdate
+            ? new Date(device.lastUpdate).toLocaleTimeString()
+            : "-"}
+        </p>
+      </CardContent>
+    </Card>
   );
 }
