@@ -1,0 +1,12 @@
+{
+	"folders": [
+		{
+			"path": "../../../../tugas-kuliah-semester-4/project-iot-power-and-current-monitoring"
+		},
+		{
+			"name": "voltage-current-monitoring",
+			"path": ".."
+		}
+	],
+	"settings": {}
+}

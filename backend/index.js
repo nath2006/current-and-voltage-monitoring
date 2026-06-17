@@ -130,7 +130,7 @@ let latestData = {
 };
 
 const mqttClient = mqtt.connect(
-  "mqtt://192.168.1.6:1883"
+  "mqtt://192.168.1.103:1883"
 );
 
 mqttClient.on("connect", () => {
