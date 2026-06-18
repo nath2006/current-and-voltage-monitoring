@@ -4,12 +4,17 @@ import prisma from "../lib/prisma.ts";
  * Hitung dan simpan/update ringkasan harian dari tabel readings untuk
  * tanggal tertentu (default: hari ini, waktu lokal server).
  */
-async function rollupDailySummary(dateStr) {
+async function rollupDailySummary(dateStr?: string) {
   const targetDate = dateStr || formatDate(new Date());
   const { start, end } = dayRange(targetDate);
 
   const readings = await prisma.reading.findMany({
-    where: { recordedAt: { gte: start, lt: end } },
+    where: { 
+      recordedAt: { 
+        gte: start, 
+        lt: end 
+      } 
+    },
     orderBy: { recordedAt: "asc" },
   });
 
@@ -32,8 +37,11 @@ async function rollupDailySummary(dateStr) {
 
   const peakHour = findPeakHour(readings);
 
+  // Buat Date object untuk Prisma (hanya tanggal, tanpa waktu)
+  const dateObj = new Date(`${targetDate}T00:00:00.000Z`);
+
   const summary = await prisma.dailySummary.upsert({
-    where: { date: targetDate },
+    where: { date: dateObj },
     update: {
       totalEnergyKwh: totalEnergyKwh >= 0 ? totalEnergyKwh : 0,
       activeDurationSeconds,
@@ -42,7 +50,7 @@ async function rollupDailySummary(dateStr) {
       peakHour,
     },
     create: {
-      date: targetDate,
+      date: dateObj,
       totalEnergyKwh: totalEnergyKwh >= 0 ? totalEnergyKwh : 0,
       activeDurationSeconds,
       avgPower,
@@ -54,7 +62,7 @@ async function rollupDailySummary(dateStr) {
   return summary;
 }
 
-function findPeakHour(readings) {
+function findPeakHour(readings: any[]) {
   const hourlyPower = Array(24).fill(0);
   const hourlyCount = Array(24).fill(0);
 
@@ -81,14 +89,14 @@ function findPeakHour(readings) {
   return peakHour;
 }
 
-function dayRange(dateStr) {
-  const start = new Date(`${dateStr}T00:00:00`);
-  const end = new Date(`${dateStr}T23:59:59.999`);
-
+function dayRange(dateStr: string) {
+  // Gunakan UTC untuk konsistensi
+  const start = new Date(`${dateStr}T00:00:00.000Z`);
+  const end = new Date(`${dateStr}T23:59:59.999Z`);
   return { start, end };
 }
 
-function formatDate(date) {
+function formatDate(date: Date) {
   return date.toISOString().split("T")[0];
 }
 

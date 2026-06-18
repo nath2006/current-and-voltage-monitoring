@@ -8,12 +8,23 @@ import { formatDate } from "./rollupService.ts";
 async function getSummary(period = "today") {
   const { current, previous } = getPeriodRanges(period);
 
+  // Konversi string ke Date object untuk Prisma
   const currentSummaries = await prisma.dailySummary.findMany({
-    where: { date: { gte: current.start, lte: current.end } },
+    where: { 
+      date: { 
+        gte: new Date(`${current.start}T00:00:00.000Z`), 
+        lte: new Date(`${current.end}T23:59:59.999Z`) 
+      } 
+    },
   });
 
   const previousSummaries = await prisma.dailySummary.findMany({
-    where: { date: { gte: previous.start, lte: previous.end } },
+    where: { 
+      date: { 
+        gte: new Date(`${previous.start}T00:00:00.000Z`), 
+        lte: new Date(`${previous.end}T23:59:59.999Z`) 
+      } 
+    },
   });
 
   const currentAgg = aggregate(currentSummaries);
@@ -36,7 +47,7 @@ async function getSummary(period = "today") {
   };
 }
 
-function aggregate(summaries) {
+function aggregate(summaries: any[]) {
   if (summaries.length === 0) {
     return {
       totalEnergyKwh: 0,
@@ -65,16 +76,16 @@ function aggregate(summaries) {
   };
 }
 
-function percentChange(prev, curr) {
+function percentChange(prev: number, curr: number) {
   if (prev === 0) return curr > 0 ? 100 : 0;
   return round(((curr - prev) / prev) * 100);
 }
 
-function round(n) {
+function round(n: number) {
   return Math.round(n * 100) / 100;
 }
 
-function getPeriodRanges(period) {
+function getPeriodRanges(period: string) {
   const today = new Date();
   const todayStr = formatDate(today);
 
@@ -107,6 +118,7 @@ function getPeriodRanges(period) {
     };
   }
 
+  // Month (30 days)
   const monthStart = new Date(today);
   monthStart.setDate(monthStart.getDate() - 29);
 
