@@ -44,34 +44,34 @@ export default function EnergyTrendChart() {
           ) : (
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={chartData}>
-                <CartesianGrid
-                  strokeDasharray="3 3"
-                  stroke="hsl(var(--border))"
-                />
-                <XAxis
-                  dataKey="label"
-                  tick={{ fontSize: 12, fill: "hsl(var(--muted-foreground))" }}
-                  stroke="hsl(var(--border))"
-                />
-                <YAxis
-                  tick={{ fontSize: 12, fill: "hsl(var(--muted-foreground))" }}
-                  stroke="hsl(var(--border))"
-                />
-                <Tooltip
-                  contentStyle={{
-                    backgroundColor: "hsl(var(--popover))",
-                    border: "1px solid hsl(var(--border))",
-                    borderRadius: "8px",
-                    color: "hsl(var(--popover-foreground))",
-                  }}
-                />
-                <Line
-                  type="monotone"
-                  dataKey="value"
-                  stroke="hsl(var(--primary))"
-                  strokeWidth={2}
-                  dot={false}
-                />
+             <CartesianGrid
+                strokeDasharray="3 3"
+                stroke="var(--border)"
+              />
+              <XAxis
+                dataKey="label"
+                tick={{ fontSize: 12, fill: "var(--muted-foreground)" }}
+                stroke="var(--border)"
+              />
+              <YAxis
+                tick={{ fontSize: 12, fill: "var(--muted-foreground)" }}
+                stroke="var(--border)"
+              />
+              <Tooltip
+                contentStyle={{
+                  backgroundColor: "var(--popover)",
+                  border: "1px solid var(--border)",
+                  borderRadius: "8px",
+                  color: "var(--popover-foreground)",
+                }}
+              />
+              <Line
+                type="monotone"
+                dataKey="value"
+                stroke="var(--primary)"
+                strokeWidth={2}
+                dot={false}
+              />
               </LineChart>
             </ResponsiveContainer>
           )}
