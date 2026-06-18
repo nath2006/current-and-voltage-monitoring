@@ -338,8 +338,8 @@ project-root
 
 ## Dashboard Preview (v2)
 
-![Dashboard v2](./frontend/preview/v2-dark-mode.png)
-![Dashboard v2](./frontend/preview/v2-light-mode.png)
+![Dashboard v2](./frontend/preview/preview-v2-dark-mode.png)
+![Dashboard v2](./frontend/preview/preview-v2-light-mode.png)
 
 ---
 
