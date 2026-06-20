@@ -1,26 +1,29 @@
 import { useState } from "react";
-import { Menu } from "lucide-react";
 import Sidebar from "./Sidebar";
 import Header from "./Header";
-import { Button } from "@/Components/ui/button";
+import { cn } from "@/lib/utils";
 
 export default function DashboardLayout({ children }) {
   const [isOpen, setIsOpen] = useState(false);
+  const [isCollapsed, setIsCollapsed] = useState(false);
 
   return (
     <div className="flex min-h-screen bg-background text-foreground">
-      <Sidebar isOpen={isOpen} setIsOpen={setIsOpen} />
+      <Sidebar
+        isOpen={isOpen}
+        setIsOpen={setIsOpen}
+        isCollapsed={isCollapsed}
+        setIsCollapsed={setIsCollapsed}
+      />
 
-      <main className="flex-1 min-w-0">
-        <div className="lg:hidden flex items-center justify-between p-4 border-b bg-card">
-          <Button variant="outline" size="icon" onClick={() => setIsOpen(true)}>
-            <Menu className="h-5 w-5" />
-          </Button>
-        </div>
-
-        <Header />
-
-        <div className="p-5">{children}</div>
+      <main
+        className={cn(
+          "flex-1 min-w-0 transition-all duration-200 ease-in-out",
+          isCollapsed ? "lg:pl-16" : "lg:pl-64"
+        )}
+      >
+        <Header onMenuClick={() => setIsOpen(true)} />
+        <div className="p-4 sm:p-5">{children}</div>
       </main>
     </div>
   );
