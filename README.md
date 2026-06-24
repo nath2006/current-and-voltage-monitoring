@@ -59,13 +59,13 @@ A real‑time electrical energy monitoring system built with an ESP32 microcontr
      ▼
  Node.js Backend ──► MariaDB
      │
- ┌───┴─────────────┐
- ▼                 ▼
-REST API       Socket.IO
- │                 │
- └───────┬─────────┘
-         ▼
-  React Dashboard
+     │
+     ▼
+ REST API
+    │
+    │
+    ▼
+React Dashboard
 ```
 
 ---
