@@ -4,7 +4,7 @@ import { rollupDailySummary, formatDate } from "./rollupService.js";
 
 function startScheduledJobs() {
   // Jalan setiap hari pukul 23:09
-  cron.schedule("25 23 * * *", async () => {
+  cron.schedule("05 00 * * *", async () => {
     console.log("[CRON] Starting daily rollup...");
 
     try {
