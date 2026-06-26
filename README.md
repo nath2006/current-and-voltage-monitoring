@@ -338,11 +338,30 @@ project-root
 
 ## Dashboard Preview (v2)
 
-![Dashboard v2](./frontend/preview/preview-v2-dark-mode.png)
-![Dashboard v2](./frontend/preview/preview-v2-light-mode.png)
+![Dashboard v2](./frontend/preview/preview-1.png)
+![Dashboard v2](./frontend/preview/close-menu-preview-1.png)
+![Dashboard v2](./frontend/preview/preview-2.png)
+![Dashboard v2](./frontend/preview/close-menu-preview-2.png)
 
 ---
+# Troubleshooting: Connection Issue
 
+### Symptom
+The ESP32 fails to receive data from the PZEM sensor, even though the physical wiring connects the PZEM's RX to pin 16 and TX to pin 17.
+
+### Solution
+Swap the pin configurations in your wiring or code so that **TX connects to pin 16** and **RX connects to pin 17**.
+
+### Technical Explanation
+This occurs due to the fundamental nature of UART (Universal Asynchronous Receiver-Transmitter) communication. In serial communication, the signals must always cross over: **Transmit (TX) on one device must connect to Receive (RX) on the opposing device.**
+
+The firmware defines pin 16 as the ESP32's receiving end (RX) and pin 17 as the transmitting end (TX). Therefore:
+* **Pin 16 (ESP32 RX)** $\rightarrow$ Must connect to **PZEM TX**
+* **Pin 17 (ESP32 TX)** $\rightarrow$ Must connect to **PZEM RX**
+
+Connecting RX to RX or TX to TX will cause a communication conflict, which is why reversing the wires resolves the issue and allows the data to flow correctly.
+
+---
 ## License
 
 This project is developed for educational, research, and IoT monitoring purposes.
