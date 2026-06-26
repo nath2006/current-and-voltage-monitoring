@@ -45,7 +45,7 @@ async function getHistory(range = "day") {
   const since = new Date();
   since.setDate(since.getDate() - days);
 
-  // Karena kolom date bertipe DATE, reset ke awal hari
+  // Karena kolom date tipenya DATE, reset ke awal cuk
   since.setHours(0, 0, 0, 0);
 
   const summaries = await prisma.dailySummary.findMany({
