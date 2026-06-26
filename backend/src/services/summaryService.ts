@@ -1,5 +1,5 @@
-import prisma from "../lib/prisma.ts";
-import { formatDate } from "./rollupService.ts";
+import prisma from "../lib/prisma.js";
+import { formatDate } from "./rollupService.js";
 
 /**
  * Statistik ringkasan untuk periode tertentu, plus perbandingan

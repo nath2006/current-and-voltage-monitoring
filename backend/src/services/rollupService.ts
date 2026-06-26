@@ -1,4 +1,4 @@
-import prisma from "../lib/prisma.ts";
+import prisma from "../lib/prisma.js";
 
 /**
  * Hitung dan simpan/update ringkasan harian dari tabel readings untuk

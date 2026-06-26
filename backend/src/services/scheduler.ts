@@ -1,24 +1,48 @@
 import cron from "node-cron";
+import prisma from "../lib/prisma.js";
 import { rollupDailySummary, formatDate } from "./rollupService.js";
 
 function startScheduledJobs() {
-  // Jalan tiap jam 00:05, rollup data hari kemarin
-  // supaya reading terakhir hari itu sudah pasti tersimpan
-  cron.schedule("5 0 * * *", async () => {
-    const yesterday = new Date();
-    yesterday.setDate(yesterday.getDate() - 1);
-
-    const dateStr = formatDate(yesterday);
+  // Jalan setiap hari pukul 23:09
+  cron.schedule("25 23 * * *", async () => {
+    console.log("[CRON] Starting daily rollup...");
 
     try {
-      const result = await rollupDailySummary(dateStr);
+      const readings = await prisma.reading.findMany({
+        select: {
+          recordedAt: true,
+        },
+        orderBy: {
+          recordedAt: "asc",
+        },
+      });
 
-      console.log(
-        `[CRON] Daily rollup for ${dateStr}:`,
-        result ? "done" : "no data"
-      );
-    } catch (err) {
-      console.error("[CRON] Rollup failed:", err.message);
+      if (readings.length === 0) {
+        console.log("[CRON] No readings found.");
+        return;
+      }
+
+      // Ambil semua tanggal unik seperti endpoint backfill
+      const dates = [...new Set(readings.map((r) => formatDate(r.recordedAt)))].sort();
+
+      console.log(`[CRON] Processing ${dates.length} dates...`);
+
+      for (const dateStr of dates) {
+        try {
+          const result = await rollupDailySummary(dateStr);
+
+          console.log(
+            `[CRON] Daily rollup for ${dateStr}:`,
+            result ? "done" : "no data"
+          );
+        } catch (err: any) {
+          console.error(`[CRON] Rollup failed for ${dateStr}:`, err.message);
+        }
+      }
+
+      console.log("[CRON] Daily rollup finished.");
+    } catch (err: any) {
+      console.error("[CRON] Scheduler failed:", err.message);
     }
   });
 
